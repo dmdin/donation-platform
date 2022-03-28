@@ -6,10 +6,13 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod donation_platform {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, bump: u8, target: u64) -> Result<()>
+    pub fn initialize(ctx: Context<Initialize>,
+                      // bump: u8,
+                      target: u64
+    ) -> Result<()>
     {
         let donate_platform = &mut ctx.accounts.donate_platform;
-        donate_platform.bump = bump;
+        // donate_platform.bump = bump;
         donate_platform.authority = *ctx.accounts.authority.to_account_info().key;
         donate_platform.target = target;
         donate_platform.collected = 0;
@@ -37,7 +40,9 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(init, payer = authority, space = 64 + 64, seeds = [b"donate_platform", authority.key().as_ref()], bump)]
+    #[account(init, payer = authority, space = 64 + 64)]
+    // seeds = [b"donate_platform", authority.key().as_ref()], bump
+
     pub donate_platform: Account<'info, Donates>,
     pub system_program: Program<'info, System>
 }
@@ -54,13 +59,14 @@ pub struct Send<'info>{
     pub donator: Signer<'info>,
     // pub receiver: PubKey,
     // #[account(mut, seeds=[b"donate_platform", receiver.to_bytes()], bump = donate_platform.bump)]
+    #[account(mut)]
     pub donate_platform: Account<'info, Donates>
 }
 
 #[account]
 pub struct Donates {
     pub authority: Pubkey,
-    pub bump: u8,
+    // pub bump: u8,
     pub target: u64,
     pub collected: u64,
     pub donators: Vec<Donation>,
