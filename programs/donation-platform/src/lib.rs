@@ -8,8 +8,7 @@ pub mod donation_platform {
 
     pub fn initialize(ctx: Context<Initialize>,
                       // bump: u8,
-                      target: u64
-    ) -> Result<()>
+                      target: u64) -> Result<()>
     {
         let donate_platform = &mut ctx.accounts.donate_platform;
         // donate_platform.bump = bump;
@@ -22,7 +21,7 @@ pub mod donation_platform {
     pub fn send(ctx: Context<Send>, amount: u64) -> Result<()>{
         let address = ctx.accounts.donator.key();
         let donation = Donation {address, amount};
-
+        msg!("{:?}", donation);
         let donate_platform = &mut ctx.accounts.donate_platform;
         donate_platform.donators.push(donation);
         donate_platform.collected += amount;
@@ -57,7 +56,6 @@ pub struct Withdraw<'info> {
 #[derive(Accounts)]
 pub struct Send<'info>{
     pub donator: Signer<'info>,
-    // pub receiver: PubKey,
     // #[account(mut, seeds=[b"donate_platform", receiver.to_bytes()], bump = donate_platform.bump)]
     #[account(mut)]
     pub donate_platform: Account<'info, Donates>
