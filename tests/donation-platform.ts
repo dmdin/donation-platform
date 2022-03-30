@@ -14,8 +14,6 @@ describe("Let's test donation platform!", () => {
 
   const program = anchor.workspace.DonationPlatform as Program<DonationPlatform>;
   const systemProgram = SystemProgram.programId;
-  // const donatePlatformKeypair = anchor.web3.Keypair.generate();
-  // const donatePlatform = donatePlatformKeypair.publicKey;
   let owner = provider.wallet;
   let authority = owner.publicKey;
 
@@ -66,9 +64,18 @@ describe("Let's test donation platform!", () => {
       .rpc();
 
     let donates = await program.account.donates.fetch(donatePlatform);
-    assert.equal(donates.target, target, "Targets are not the same!");
-    assert.deepEqual(donates.authority, authority, "Authorities are not the same!")
-    assert.equal(donates.collected, 0, "Collected amount is not zero!")
+    assert.equal(
+      donates.target, target,
+      "Targets are not the same!"
+    );
+    assert.deepEqual(
+      donates.authority, authority,
+      "Authorities are not the same!"
+    )
+    assert.equal(
+      donates.collected, 0,
+      "Collected amount is not zero!"
+    )
   });
 
   it("User can send lamports", async () => {
@@ -86,10 +93,17 @@ describe("Let's test donation platform!", () => {
       .rpc()
 
     let lamportsAfter = await provider.connection.getBalance(donatePlatform);
-    assert.equal(lamportsAfter, lamportsBefore + change, "Unexpected amount of lamports after send!")
+    assert.equal(
+      lamportsAfter, lamportsBefore + change,
+      "Unexpected amount of lamports after send!"
+    )
+
     let donates = await program.account.donates.fetch(donatePlatform);
-    // @ts-ignore
-    assert.deepEqual(donates.donators.slice(-1)[0].address, donator, "The last donator is not ours!");
+    assert.deepEqual(
+      // @ts-ignore
+      donates.donators.slice(-1)[0].address, donator,
+      "The last donator is not ours!"
+    );
   });
 
   it("User can't send 0 lamports", async () => {
@@ -122,6 +136,7 @@ describe("Let's test donation platform!", () => {
     let progBefore = await provider.connection.getBalance(donatePlatform);
     let authBefore = await provider.connection.getBalance(authority);
     let collected = (await program.account.donates.fetch(donatePlatform)).collected.toNumber();
+
     await program.methods
       .withdraw()
       .accounts({donatePlatform, authority})
@@ -130,7 +145,10 @@ describe("Let's test donation platform!", () => {
     let progAfter = await provider.connection.getBalance(donatePlatform);
     let authAfter = await provider.connection.getBalance(authority);
 
-    assert.equal(progBefore - progAfter - collected, authAfter - authBefore, "Difference between collected authority and doesn't match!");
+    assert.equal(
+      progBefore - progAfter - collected, authAfter - authBefore,
+      "Difference between collected authority and doesn't match!"
+    );
   });
 
   it("Authority can't withdraw lamports if collected == 0", async () => {
