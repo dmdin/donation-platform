@@ -38,14 +38,22 @@ pub mod donation_platform {
     }
 
     pub fn withdraw(ctx: Context<Withdraw>) -> Result<()>{
+
         let collected = ctx.accounts.donate_platform.collected;
         require!(collected > 0, DonateErrors::NoCollectedLamports);
 
-        let (from, from_info) = (&ctx.accounts.donate_platform.key(), ctx.accounts.donate_platform.to_account_info());
-        let (to, to_info) = (&ctx.accounts.authority.key(), ctx.accounts.authority.to_account_info());
-        invoke(&transfer(from, to, collected), &[from_info, to_info])?;
+        let from = ctx.accounts.donate_platform.to_account_info();
+        let to = ctx.accounts.authority.to_account_info();
 
+        // TODO add rent calc
+        let rent_exemption = Rent::get()?.minimum_balance(256);
+        let withdraw_amount = **from.lamports.borrow() - rent_exemption;
+        // require!(withdraw_amount < collected, DonateErrors::NoLamportsForRent);
+
+        **from.try_borrow_mut_lamports()? -= withdraw_amount;
+        **to.try_borrow_mut_lamports()? += withdraw_amount;
         ctx.accounts.donate_platform.collected = 0;
+
         Ok(())
     }
 }
@@ -61,9 +69,12 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(mut, has_one = authority)]
-    pub donate_platform: Account<'info, Donates>,
+    #[account(mut)]
     pub authority: Signer<'info>,
+    #[account(mut, has_one = authority, seeds = [b"donate_platform", donate_platform.authority.key().as_ref()], bump)]
+    pub donate_platform: Account<'info, Donates>,
+    pub system_program: Program<'info, System>
+
 }
 
 #[derive(Accounts)]
@@ -78,7 +89,6 @@ pub struct Send<'info>{
 #[account]
 pub struct Donates {
     pub authority: Pubkey,
-    // pub bump: u8,
     pub target: u64,
     pub collected: u64,
     pub donators: Vec<Donation>,
@@ -98,4 +108,7 @@ pub enum DonateErrors {
     NoCollectedLamports,
     #[msg("The target was reached")]
     TargetReached,
+    #[msg("Impossible to withdraw. Not enough lamports to pay rent")]
+    NoLamportsForRent
+
 }
