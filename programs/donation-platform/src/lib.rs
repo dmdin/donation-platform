@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_instruction::transfer;
 use anchor_lang::solana_program::program::invoke;
-use anchor_lang;
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -12,7 +11,6 @@ pub mod donation_platform {
     pub fn initialize(ctx: Context<Initialize>, target: u64) -> Result<()> {
         require!(target > 0, DonateErrors::ZeroLamports);
         let donate_platform = &mut ctx.accounts.donate_platform;
-        // donate_platform.bump = bump;
         donate_platform.authority = ctx.accounts.authority.key();
         donate_platform.target = target;
         donate_platform.collected = 0;
@@ -56,7 +54,7 @@ pub mod donation_platform {
 pub struct Initialize<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
-    #[account(init, payer = authority, space = 64 + 64, seeds = [b"donate_platform", authority.key().as_ref()], bump)]
+    #[account(init, payer = authority, space = 256, seeds = [b"donate_platform", authority.key().as_ref()], bump)]
     pub donate_platform: Account<'info, Donates>,
     pub system_program: Program<'info, System>
 }
@@ -70,10 +68,11 @@ pub struct Withdraw<'info> {
 
 #[derive(Accounts)]
 pub struct Send<'info>{
-    pub donator: Signer<'info>,
-    // #[account(mut, bump = donate_platform.bump)]
     #[account(mut)]
-    pub donate_platform: Account<'info, Donates>
+    pub donator: Signer<'info>,
+    #[account(mut, seeds = [b"donate_platform", donate_platform.authority.key().as_ref()], bump)]
+    pub donate_platform: Account<'info, Donates>,
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
@@ -99,5 +98,4 @@ pub enum DonateErrors {
     NoCollectedLamports,
     #[msg("The target was reached")]
     TargetReached,
-
 }

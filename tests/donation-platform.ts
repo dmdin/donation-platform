@@ -8,7 +8,7 @@ chai.use(chaiAsPromised);
 
 const {SystemProgram} = anchor.web3;
 
-describe("Let's test donation platform!", async () => {
+describe("Let's test donation platform!", () => {
   anchor.setProvider(anchor.Provider.env());
   const provider = anchor.getProvider();
 
@@ -19,15 +19,29 @@ describe("Let's test donation platform!", async () => {
   let owner = provider.wallet;
   let authority = owner.publicKey;
 
-  let [donatePlatform, donatePlatformBump] = await anchor.web3.PublicKey.findProgramAddress(
-    [Buffer.from("donate_platform"), authority.toBuffer()], program.programId
-  )
+  async function find_program(authority: anchor.web3.PublicKey) {
+    return await anchor.web3.PublicKey.findProgramAddress(
+      [Buffer.from("donate_platform"), authority.toBuffer()], program.programId
+    );
+  }
 
+  async function get_lamports(to: anchor.web3.Keypair | anchor.web3.PublicKey) {
+    await provider.connection.confirmTransaction(
+      await provider.connection.requestAirdrop(donator, 2 * anchor.web3.LAMPORTS_PER_SOL),
+      'confirmed'
+    )
+  }
   let donatorKeypair = anchor.web3.Keypair.generate();
   let donator = donatorKeypair.publicKey;
 
+  before(async () => {
+    await get_lamports(donator)
+
+  })
+
   it("Program must throw error with target 0", async () => {
-    await expect((async () =>
+    let [donatePlatform, donatePlatformBump] = await find_program(authority);
+    expect((async () =>
         await program.methods
           .initialize(new anchor.BN(0))
           .accounts({
@@ -36,17 +50,17 @@ describe("Let's test donation platform!", async () => {
             systemProgram,
           })
           .rpc()
-      )()
-    ).to.be.rejectedWith(/Amount of lamports must be more than zero/);
+    )()).to.be.rejectedWith(/Amount of lamports must be more than zero/);
   });
 
   it("Program is initialized correctly", async () => {
+    let [donatePlatform, donatePlatformBump] = await find_program(authority);
+
     let tx = await program.methods
       .initialize(new anchor.BN(1000))
-      .accounts( {
+      .accounts({
           donatePlatform,
           authority,
-          systemProgram,
       })
       .rpc();
 
@@ -56,20 +70,36 @@ describe("Let's test donation platform!", async () => {
     assert.equal(donates.collected, 0, "Collected amount is not zero!")
   });
 
-  // it("Sends lamports", async () => {
-  //   const tx = await program.methods
-  //     .send(new anchor.BN(100))
-  //     .accounts({
-  //       donator,
-  //       donatePlatform,
-  //     })
-  //     .signers([donatorKeypair])
-  //     .rpc()
-  //   console.log('Completed send!,', tx)
-  //   const data = await program.account.donates.fetch(donatePlatform);
-  //   console.log(data)
-  // });
-  //
+  it("User can send lamports", async () => {
+    let [donatePlatform, donatePlatformBump] = await find_program(authority);
+    let lamportsBefore = await provider.connection.getBalance(donatePlatform);
+
+    let tx = await program.methods
+      .send(new anchor.BN(100))
+      .accounts({
+        donator,
+        donatePlatform,
+      })
+      .signers([donatorKeypair])
+      .rpc()
+    let lamportsAfter = await provider.connection.getBalance(donatePlatform);
+    assert.equal(lamportsAfter, lamportsBefore + 100, "Unexpected amount of lamports after send!")
+  });
+
+  it("User can't send 0 lamports", async () => {
+    let [donatePlatform, donatePlatformBump] = await find_program(authority);
+    expect((async () =>
+        await program.methods
+          .send(new anchor.BN(0))
+          .accounts({
+            donatePlatform,
+            donator,
+          })
+          .signers([donatorKeypair])
+          .rpc()
+    )()).to.be.rejectedWith(/Amount of lamports must be more than zero/);
+  });
+
   // it("Withdraw", async () => {
   //   const tx = await program.methods
   //     .withdraw()
