@@ -14,15 +14,16 @@ pub mod donation_platform {
         donate_platform.authority = ctx.accounts.authority.key();
         donate_platform.target = target;
         donate_platform.collected = 0;
-        donate_platform.reserved_ids = 1;
+        donate_platform.id_counter = 0;
 
         Ok(())
     }
 
     pub fn send(ctx: Context<Send>, id: u64, amount: u64) -> Result<()>{
         require!(amount > 0, DonateErrors::ZeroLamports);
-
         let donate_platform = &ctx.accounts.donate_platform;
+        require!(id <= donate_platform.id_counter, DonateErrors::IDBiggerThanCounter);
+        
         let donator = &ctx.accounts.donator;
 
         let collected = donate_platform.collected;
@@ -36,12 +37,17 @@ pub mod donation_platform {
         let donate_platform = &mut ctx.accounts.donate_platform;
         let donator_acc = &mut ctx.accounts.donator_acc;
 
-        if  id == donate_platform.reserved_ids {
+        let mut _id = id;
+        if _id == 0 {
+            _id = donate_platform.id_counter;
+        }
+
+        if  _id == donate_platform.id_counter {
             donator_acc.address = ctx.accounts.donator.key();
             donator_acc.amount = 0;
-            donator_acc.id = donate_platform.reserved_ids;
+            donator_acc.id = donate_platform.id_counter;
 
-            donate_platform.reserved_ids += 1;
+            donate_platform.id_counter += 1;
         }
 
         donator_acc.amount += amount;
@@ -112,7 +118,7 @@ pub struct Send<'info>{
         seeds = [
             b"donate_platform_donator",
             donate_platform.key().as_ref(),
-            (if id == 0 {donate_platform.reserved_ids} else {id}).to_string().as_bytes()
+            id.to_string().as_bytes()
         ],
         bump
     )]
@@ -132,7 +138,7 @@ pub struct Donates {
     pub target: u64,
     pub collected: u64,
     // If user sends 0, give new id
-    pub reserved_ids: u64,
+    pub id_counter: u64,
 }
 impl Donates {
     pub const SIZE: usize = 8 + 32 + 8 * 3;
@@ -157,6 +163,7 @@ pub enum DonateErrors {
     #[msg("The target was reached")]
     TargetReached,
     #[msg("Impossible to withdraw. Not enough lamports to pay rent")]
-    NoLamportsForRent
-
+    NoLamportsForRent,
+    #[msg("Passed ID is bigger than current ID counter")]
+    IDBiggerThanCounter
 }

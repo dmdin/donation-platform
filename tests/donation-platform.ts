@@ -13,9 +13,13 @@ describe("Let's test donation platform!", () => {
   const provider = anchor.getProvider();
 
   const program = anchor.workspace.DonationPlatform as Program<DonationPlatform>;
+  const donatesData = program.account.donates;
+  const donatorData = program.account.donator;
+
   const systemProgram = SystemProgram.programId;
   let owner = provider.wallet;
   let authority = owner.publicKey;
+
 
   async function find_donate_platform(authority: anchor.web3.PublicKey) {
     return await anchor.web3.PublicKey.findProgramAddress(
@@ -36,12 +40,15 @@ describe("Let's test donation platform!", () => {
     )
   }
 
+  async function get_balance(address: anchor.web3.PublicKey) {
+    return await provider.connection.getBalance(address);
+  }
+
   let donatorKeypair = anchor.web3.Keypair.generate();
   let donator = donatorKeypair.publicKey;
 
   before(async () => {
     await get_lamports(donator)
-
   })
 
   it("Program must throw error with target 0", async () => {
@@ -69,7 +76,7 @@ describe("Let's test donation platform!", () => {
       })
       .rpc();
 
-    let donates = await program.account.donates.fetch(donatePlatform);
+    let donates = await donatesData.fetch(donatePlatform);
     assert.equal(
       donates.target, target,
       "Targets are not the same!"
@@ -84,16 +91,14 @@ describe("Let's test donation platform!", () => {
     )
   });
 
-  it("User can send lamports", async () => {
-    let donatorId = 1;
+  it("User ID=0 can send lamports", async () => {
+    let donatorId = 0;
     let [donatePlatform,] = await find_donate_platform(authority);
     let [donatorAcc,] = await find_donator_acc(donatePlatform, donatorId);
 
-    let lamportsBefore = await provider.connection.getBalance(donatePlatform);
-    // let donatorAcc = await anchor.web3.Keypair.generate();
+    let lamportsBefore = await get_balance(donatePlatform);
     let change = 5000;
 
-    // await program.methods.
     await program.methods
       .send(new anchor.BN(donatorId), new anchor.BN(change))
       .accounts({
@@ -104,81 +109,163 @@ describe("Let's test donation platform!", () => {
       .signers([donatorKeypair])
       .rpc()
 
-    let lamportsAfter = await provider.connection.getBalance(donatePlatform);
-    // assert.equal(
-    //   lamportsAfter, lamportsBefore + change,
-    //   "Unexpected amount of lamports after send!"
-    // )
-
-    let donates = await program.account.donates.fetch(donatePlatform);
-    [donatorAcc,] = await find_donator_acc(donatePlatform, donatorId);
-
-    let donatorAccData = await program.account.donator.fetch(donatorAcc);
-    console.log(
-      donates.reservedIds.toNumber(),
-      donatorAccData.id.toNumber(),
-      donatorAccData.address.toString(),
-      donatorAccData.amount.toNumber(),
+    let lamportsAfter = await get_balance(donatePlatform);
+    assert.equal(
+      lamportsAfter, lamportsBefore + change,
+      "Unexpected amount of lamports after send!"
     )
-    // assert.deepEqual(
-    //   // @ts-ignore
-    //   donates.donators.slice(-1)[0].address, donator,
-    //   "The last donator is not ours!"
-    // );
+
+    let donates = await donatesData.fetch(donatePlatform);
+    [donatorAcc,] = await find_donator_acc(donatePlatform, donatorId);
+    let dnData = await donatorData.fetch(donatorAcc);
+
+    assert.deepEqual(
+      dnData.address, donator,
+      "The last donator is not ours!"
+    );
+    assert.equal(
+      dnData.amount, change,
+      "Amount of donations is different!"
+    );
   });
 
-  // it("User can't send 0 lamports", async () => {
-  //   let [donatePlatform,] = await find_donate_platform(authority);
-  //   expect((async () =>
-  //       await program.methods
-  //         .send(new anchor.BN(0))
-  //         .accounts({
-  //           donatePlatform,
-  //           donator,
-  //         })
-  //         .signers([donatorKeypair])
-  //         .rpc()
-  //   )()).to.be.rejectedWith(/Amount of lamports must be more than zero/);
-  // });
+  it("User ID=0 can't send 0 lamports", async () => {
+    let donatorId = 0;
+    let [donatePlatform,] = await find_donate_platform(authority);
+    let [donatorAcc,] = await find_donator_acc(donatePlatform, donatorId);
 
-  // it("Random user can't withdraw lamports", async () => {
-  //   let [donatePlatform,] = await find_donate_platform(authority);
-  //   expect((async () =>
-  //       await program.methods
-  //         .withdraw()
-  //         .accounts({donatePlatform, authority: donator})
-  //         .signers([donatorKeypair])
-  //         .rpc()
-  //   )()).to.be.rejectedWith(/A has one constraint was violated/);
-  // })
-  //
-  // it("Authority can withdraw lamports", async () => {
-  //   let [donatePlatform,] = await find_donate_platform(authority);
-  //   let progBefore = await provider.connection.getBalance(donatePlatform);
-  //   let authBefore = await provider.connection.getBalance(authority);
-  //   let collected = (await program.account.donates.fetch(donatePlatform)).collected.toNumber();
-  //
-  //   await program.methods
-  //     .withdraw()
-  //     .accounts({donatePlatform, authority})
-  //     .rpc()
-  //
-  //   let progAfter = await provider.connection.getBalance(donatePlatform);
-  //   let authAfter = await provider.connection.getBalance(authority);
-  //
-  //   assert.equal(
-  //     progBefore - progAfter - collected, authAfter - authBefore,
-  //     "Difference between collected authority and doesn't match!"
-  //   );
-  // });
-  //
-  // it("Authority can't withdraw lamports if collected == 0", async () => {
-  //   let [donatePlatform,] = await find_donate_platform(authority);
-  //   expect((async () =>
-  //       await program.methods
-  //         .withdraw()
-  //         .accounts({donatePlatform, authority})
-  //         .rpc()
-  //   )()).to.be.rejectedWith(/A has one constraint was violated/);
-  // })
+    expect((async () =>
+        await program.methods
+          .send(new anchor.BN(donatorId), new anchor.BN(0))
+          .accounts({
+            donator,
+            donatorAcc,
+            donatePlatform,
+          })
+          .signers([donatorKeypair])
+          .rpc()
+    )()).to.be.rejectedWith(/Amount of lamports must be more than zero/);
+  });
+
+  it("Random user can't withdraw lamports", async () => {
+    let [donatePlatform,] = await find_donate_platform(authority);
+    expect((async () =>
+        await program.methods
+          .withdraw()
+          .accounts({donatePlatform, authority: donator})
+          .signers([donatorKeypair])
+          .rpc()
+    )()).to.be.rejectedWith(/A has one constraint was violated/);
+  })
+
+  it("Authority can withdraw lamports", async () => {
+    let [donatePlatform,] = await find_donate_platform(authority);
+    let progBefore = await get_balance(donatePlatform);
+    let authBefore = await get_balance(authority);
+    let collected = (await program.account.donates.fetch(donatePlatform)).collected.toNumber();
+
+    await program.methods
+      .withdraw()
+      .accounts({donatePlatform, authority})
+      .rpc()
+
+    let progAfter = await get_balance(donatePlatform);
+    let authAfter = await get_balance(authority);
+
+    assert.equal(
+      progBefore - progAfter - collected, authAfter - authBefore,
+      "Difference between collected authority and doesn't match!"
+    );
+  });
+
+  it("Authority can't withdraw lamports if collected == 0", async () => {
+    let [donatePlatform,] = await find_donate_platform(authority);
+    expect((async () =>
+        await program.methods
+          .withdraw()
+          .accounts({donatePlatform, authority})
+          .rpc()
+    )()).to.be.rejectedWith(/A has one constraint was violated/);
+  })
+
+  it("ID increment works 1 time for old user", async () => {
+    let newId = 1;
+    let [donatePlatform,] = await find_donate_platform(authority);
+    let [donatorAcc,] = await find_donator_acc(donatePlatform, newId);
+    await program.methods
+      .send(new anchor.BN(newId), new anchor.BN(10))
+      .accounts({
+        donator,
+        donatorAcc,
+        donatePlatform,
+      })
+      .signers([donatorKeypair])
+      .rpc()
+    let dnData = await donatorData.fetch(donatorAcc);
+    let ptData = await donatesData.fetch(donatePlatform);
+
+    assert.equal(
+      dnData.id, newId,
+      "ID on donator account is not the same!"
+    );
+    assert.equal(
+      ptData.idCounter, newId + 1,
+      "ID counter doesn't match!"
+    );
+  });
+
+  it("ID increment works 2 time for new user", async () => {
+    let newId = 2;
+    let [donatePlatform,] = await find_donate_platform(authority);
+    let [donatorAcc,] = await find_donator_acc(donatePlatform, newId);
+
+    let donatorKeypair = anchor.web3.Keypair.generate();
+    let donator = donatorKeypair.publicKey;
+    await get_lamports(donator);
+
+    await program.methods
+      .send(new anchor.BN(newId), new anchor.BN(10))
+      .accounts({
+        donator,
+        donatorAcc,
+        donatePlatform,
+      })
+      .signers([donatorKeypair])
+      .rpc()
+
+    let dnData = await donatorData.fetch(donatorAcc);
+    let ptData = await donatesData.fetch(donatePlatform);
+
+    assert.equal(
+      dnData.id, newId,
+      "ID on donator account is not the same!"
+    );
+    assert.equal(
+      ptData.idCounter, newId + 1,
+      "ID counter doesn't match!"
+    );
+    assert.deepEqual(
+      dnData.address, donator,
+      "Addresses doesn't match!"
+    );
+  });
+
+  it("Shouldn't work because newId is more than ID counter", async () => {
+    let newId = 10;
+    let [donatePlatform,] = await find_donate_platform(authority);
+    let [donatorAcc,] = await find_donator_acc(donatePlatform, newId);
+
+    expect((async () =>
+        await program.methods
+          .send(new anchor.BN(newId), new anchor.BN(10))
+          .accounts({
+            donator,
+            donatorAcc,
+            donatePlatform,
+          })
+          .signers([donatorKeypair])
+          .rpc()
+    )()).to.be.rejectedWith(/Error Message: Passed ID is bigger than current ID counter/);
+  });
+
 });
