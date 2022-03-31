@@ -101,6 +101,10 @@ pub struct Withdraw<'info> {
 #[instruction(id: u64, amount: u64)]
 pub struct Send<'info>{
     // If client sends 0 it means, that there is no donator account
+    #[account(mut)]
+    pub donator: Signer<'info>,
+    pub system_program: Program<'info, System>,
+
     #[account(
         init_if_needed,
         payer = donator,
@@ -113,10 +117,6 @@ pub struct Send<'info>{
         bump
     )]
     pub donator_acc: Account<'info, Donator>,
-
-    #[account(mut)]
-    pub donator: Signer<'info>,
-    pub system_program: Program<'info, System>,
 
     #[account(
         mut,
