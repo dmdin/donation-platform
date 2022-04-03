@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "../app.css";
   import { onMount } from 'svelte';
   import { clusterApiUrl } from '@solana/web3.js';
   import { WalletProvider } from '@svelte-on-solana/wallet-adapter-ui';
@@ -35,4 +36,3 @@
   <slot />
 </div>
 
-<!--<h1>1231231231231</h1>-->
