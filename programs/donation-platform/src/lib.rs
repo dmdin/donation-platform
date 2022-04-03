@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_instruction::transfer;
 use anchor_lang::solana_program::program::invoke;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("5cYWeRnWwf3EQ7pg8RwzA2VEVxvPA5SEGzseDgt8QCqW");
 
 #[program]
 pub mod donation_platform {

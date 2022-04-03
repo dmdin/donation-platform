@@ -7,7 +7,7 @@
 
   const localStorageKey = 'walletAdapter';
   const network = clusterApiUrl('devnet');
-
+  
   let wallets;
 
   onMount(async () => {
@@ -34,3 +34,5 @@
 <div>
   <slot />
 </div>
+
+<!--<h1>1231231231231</h1>-->

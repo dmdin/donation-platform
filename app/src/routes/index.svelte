@@ -1,67 +1,41 @@
-<script lang="ts">
+<script lang='ts'>
   import { WalletMultiButton } from '@svelte-on-solana/wallet-adapter-ui';
   import { walletStore } from '@svelte-on-solana/wallet-adapter-core';
-  import { workSpace } from '@svelte-on-solana/wallet-adapter-anchor';
+
   import { fly } from 'svelte/transition';
+  import { data } from '$lib/stores';
+  import { Donates } from '$lib';
 
   let value;
+  let donates: Donates;
 
   $: console.log('value: ', value);
-
-  async function createCounter() {
-    try {
-      /* interact with the program via rpc */
-      await $workSpace.program.rpc.create({
-        accounts: {
-          baseAccount: $workSpace.baseAccount.publicKey,
-          user: $workSpace.provider.wallet.publicKey,
-          systemProgram: $workSpace.systemProgram.programId,
-        },
-        signers: [$workSpace.baseAccount],
-      });
-
-      const account = await $workSpace.program.account.baseAccount.fetch(
-        $workSpace.baseAccount.publicKey,
-      );
-      value = account.count.toString();
-    } catch (err) {
-      console.log('Transaction error: ', err);
-    }
+  $: if ($data && !donates) {
+    donates = new Donates($data);
+    donates.getData().then(r => console.log(r));
   }
 
-  async function increment() {
-    await $workSpace.program.rpc.increment({
-      accounts: {
-        baseAccount: $workSpace.baseAccount.publicKey,
-      },
-    });
-
-    const account = await $workSpace.program.account.baseAccount.fetch(
-      $workSpace.baseAccount.publicKey,
-    );
-    value = account.count.toString();
-  }
 </script>
 
-<div class="wrapper-app">
-  <div class="title">
+<div class='wrapper-app'>
+  <div class='title'>
     <h1>Solana Svelte Counter</h1>
     <p>
-      Demo of <a href="https://github.com/solana-labs/wallet-adapter"
-        >svelte-on-solana/wallet-adapter</a
-      >, for implementation in Svelte of the <strong>wallet adapter</strong>
+      Demo of <a href='https://github.com/solana-labs/wallet-adapter'
+    >svelte-on-solana/wallet-adapter</a
+    >, for implementation in Svelte of the <strong>wallet adapter</strong>
     </p>
   </div>
 
-  <div class="address">
+  <div class='address'>
     <WalletMultiButton />
   </div>
 
   {#if $walletStore?.connected}
-    <div class="wrapper-content">
+    <div class='wrapper-content'>
       {#if value}
-        <button on:click={increment}>Increment</button>
-        <p class="value">
+        <button on:click={() => {}}>Increment</button>
+        <p class='value'>
           Value:
           {#key value}
             <span
@@ -71,12 +45,12 @@
           {/key}
         </p>
       {:else}
-        <button on:click={createCounter}>Create counter</button>
+        <button on:click={() => {}}>Create counter</button>
       {/if}
     </div>
-    <p class="warning">You are connected to DevNet!</p>
+    <p class='warning'>You are connected to DevNet!</p>
   {:else}
-    <p class="warning">You are not connected...</p>
+    <p class='warning'>You are not connected...</p>
   {/if}
 </div>
 
@@ -86,11 +60,13 @@
     margin: 0;
     background-color: #333333;
   }
+
   .wrapper-app {
     height: 100vh;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS',
-      sans-serif;
+    sans-serif;
   }
+
   .title {
     text-align: center;
     color: white;
