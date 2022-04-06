@@ -5,13 +5,13 @@ import { writable } from 'svelte/store';
 import { PDA } from './pda';
 import type { DonatePlatfrom } from './types';
 
-export let data: Writable<DonatePlatfrom> = writable();
+export const data: Writable<DonatePlatfrom> = writable();
 
 workSpace.subscribe(async (update) => {
   if (!update?.program || !update?.provider || !update?.systemProgram) return;
 
-  let pda = new PDA(update.program.programId);
-  let [donatePlatform] = await pda.donatePlatform(update.provider.wallet.publicKey);
+  const pda = new PDA(update.program.programId);
+  const [donatePlatform] = await pda.donatePlatform(update.provider.wallet.publicKey);
 
   data.set({
     donates: update.program.account.donates,

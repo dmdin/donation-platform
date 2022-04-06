@@ -11,11 +11,12 @@ export class Donates implements DonatePlatfrom {
   systemProgram: anchor.web3.PublicKey;
   donatePlatform: anchor.web3.PublicKey;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor(data: DonatePlatfrom) {
   }
 
   async getData(): Promise<DonatesAcc | undefined> {
-    let { donates, donatePlatform } = this;
+    const { donates, donatePlatform } = this;
     try {
       return await donates.fetch(donatePlatform);
     } catch (e) {
@@ -24,9 +25,9 @@ export class Donates implements DonatePlatfrom {
   }
 
   async getDonator(id: number): Promise<DonatorAcc | undefined> {
-    let { pda, donatePlatform, donator } = this;
+    const { pda, donatePlatform, donator } = this;
     try {
-      let donatorAcc = await pda.donatorAcc(donatePlatform, id);
+      const donatorAcc = await pda.donatorAcc(donatePlatform, id);
       return await donator.fetch(donatorAcc);
     } catch (e) {
       console.log(`Error during getting Donator(id=${id}) account data:`, e);
@@ -34,7 +35,7 @@ export class Donates implements DonatePlatfrom {
   }
 
   async getDonators(): Promise<DonatorAcc[]> {
-    let { idCounter } = await this.getData();
+    const { idCounter } = await this.getData();
     let donators = [];
     for (const i of Array(idCounter).keys()) {
       donators.push(this.getDonator(i));
@@ -47,10 +48,10 @@ export class Donates implements DonatePlatfrom {
   }
 
   async send(donation: MakeDonation): Promise<Success> {
-    let { address, amount, id } = donation;
+    const { address, amount, id } = donation;
     if (amount <= 0 || id < 0) return false;
-    let { program, donatePlatform, pda } = this;
-    let donatorAcc = await pda.donatorAcc(donatePlatform, id);
+    const { program, donatePlatform, pda } = this;
+    const donatorAcc = await pda.donatorAcc(donatePlatform, id);
 
     try {
       await program.methods
@@ -59,7 +60,8 @@ export class Donates implements DonatePlatfrom {
           donator: address,
           donatorAcc,
           donatePlatform,
-        });
+        })
+        .rpc();
 
       return true;
     } catch (e) {
@@ -69,7 +71,7 @@ export class Donates implements DonatePlatfrom {
   }
 
   async withdraw(): Promise<Success> {
-    let { program, donatePlatform, authority } = this;
+    const { program, donatePlatform, authority } = this;
     try {
       await program.methods
         .withdraw()
@@ -86,7 +88,7 @@ export class Donates implements DonatePlatfrom {
     if (target <= 0) return false;
 
     try {
-      let { authority, pda, systemProgram, program, donatePlatform } = this;
+      const { authority, pda, systemProgram, program, donatePlatform } = this;
       await program.methods
         .initialize(new anchor.BN(target))
         .accounts({
