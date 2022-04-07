@@ -9,6 +9,6 @@
 <style>
   :global(.wallet-button-wrapper .wallet-adapter-button-trigger) {
     @apply btn btn-sm btn-primary text-xs;
-    width: 130px;
+    width: 145px;
   }
 </style>

@@ -1,64 +1,52 @@
 <script lang="ts">
-  import '../app.css';
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { clusterApiUrl } from '@solana/web3.js';
-  import {
-    WalletMultiButton,
-    WalletProvider,
-  } from '@svelte-on-solana/wallet-adapter-ui';
-  import WalletButton from './_components/WalletButtonWrapper.svelte';
-
-  import { AnchorConnectionProvider } from '@svelte-on-solana/wallet-adapter-anchor';
-  import idl from '../../../target/idl/donation_platform.json';
-
-  const localStorageKey = 'walletAdapter';
-  const network = clusterApiUrl('devnet');
-
+  import "../app.css";
+  import { page } from "$app/stores";
+  import { onMount } from "svelte";
+  import { clusterApiUrl } from "@solana/web3.js";
+  import { WalletProvider } from "@svelte-on-solana/wallet-adapter-ui";
+  import WalletButton from "./_components/WalletButtonWrapper.svelte";
+  import Fa from "svelte-fa";
+  import { faBars, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+  
+  import { AnchorConnectionProvider } from "@svelte-on-solana/wallet-adapter-anchor";
+  import idl from "../../../target/idl/donation_platform.json";
+  
+  const localStorageKey = "walletAdapter";
+  const network = clusterApiUrl("devnet");
+  
   let wallets;
-
+  
   onMount(async () => {
     const {
       PhantomWalletAdapter,
       SlopeWalletAdapter,
       SolflareWalletAdapter,
-      SolletExtensionWalletAdapter,
-    } = await import('@solana/wallet-adapter-wallets');
-
+      SolletExtensionWalletAdapter
+    } = await import("@solana/wallet-adapter-wallets");
+    
     const walletsMap = [
       new PhantomWalletAdapter(),
       new SlopeWalletAdapter(),
       new SolflareWalletAdapter(),
-      new SolletExtensionWalletAdapter(),
+      new SolletExtensionWalletAdapter()
     ];
-
+    
     wallets = walletsMap;
   });
+  
+  let theme: "light" | "night" = "light";
   $: path = $page.url.pathname;
 </script>
 
 <WalletProvider {localStorageKey} {wallets} autoConnect />
 <AnchorConnectionProvider {network} {idl} />
-<div class="h-screen grid place-items-center bg-base-200">
+<div data-theme={theme} class="h-screen grid place-items-center bg-base-200">
   <div class="artboard phone-3 rounded-2xl bg-base-100">
     <div class="navbar bg-base">
       <div class="navbar-start">
         <div class="dropdown">
           <label tabindex="0" class="btn btn-ghost btn-circle">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h7"
-              />
-            </svg>
+            <Fa icon={faBars} size="lg" />
           </label>
           <ul
             tabindex="0"
@@ -72,15 +60,28 @@
             </li>
             <li>
               <a class:text-accent-focus={path === '/donate'} href="/donate"
-                >Donate</a
+              >Donate</a
               >
             </li>
           </ul>
         </div>
+        
+        {#if theme === 'light'}
+          <button
+            class="btn btn-ghost btn-circle"
+            on:click={() => theme = 'night'}
+          >
+            <Fa icon={faSun} size="lg" />
+          </button>
+        {:else}
+          <button
+            class="btn btn-ghost btn-circle"
+            on:click={() => theme = 'light'}
+          >
+            <Fa icon={faMoon} size="lg" />
+          </button>
+        {/if}
       </div>
-      <!--			<div class="navbar-center">-->
-      <!--				<a href="/" class="btn btn-ghost normal-case text-xl">SolDonuts🍩</a>-->
-      <!--			</div>-->
       <div class="navbar-end btn-sm text-sm">
         <WalletButton />
       </div>

@@ -1,26 +1,46 @@
-import type { Idl, Program, web3 } from '@project-serum/anchor';
-import * as anchor from '@project-serum/anchor';
-import type { PDA } from './pda';
-import type {
-  DonatePlatform,
-  DonatesAcc,
-  DonatorAcc,
-  MakeDonation,
-  Success,
-} from './types';
+import * as anchor from "@project-serum/anchor";
+import { Idl, Program, web3 } from "@project-serum/anchor";
+import { PDA } from "./pda";
+import type { DonatePlatform, DonatesAcc, DonatorAcc, MakeDonation, PlatformInit, Success } from "./types";
 
 export class Donates implements DonatePlatform {
+
+  // Get them from constructor
+  program: Program<Idl>;
+  systemProgram: web3.PublicKey;
+
+  // We can get this fields during init
+  pda: PDA;
   donates: any;
   donator: any;
-  pda: PDA;
-  program: Program<Idl>;
+
+  // This fields we set when we know owner of platform
   authority: web3.PublicKey;
-  systemProgram: web3.PublicKey;
   donatePlatform: web3.PublicKey;
 
-  constructor(data: DonatePlatform) {
-    Object.assign(this, data);
+  constructor({ program, systemProgram }: PlatformInit) {
+    this.program = program;
+    this.donates = program.account.donates;
+    this.donator = program.account.donator;
+    this.systemProgram = systemProgram;
+    this.pda = new PDA(program.programId);
   }
+
+  async setOwner(authority: web3.PublicKey | string): Promise<Success> {
+    if (typeof authority === "string") {
+      try {
+        authority = new web3.PublicKey(authority);
+      } catch (e) {
+        console.error("The string is not public key!", e);
+        return false;
+      }
+    }
+    this.authority = authority;
+    const [donatePlatform] = await this.pda.donatePlatform(authority);
+    this.donatePlatform = donatePlatform;
+    return true;
+  }
+
 
   test() {
     const { donates, donatePlatform } = this;
@@ -32,7 +52,7 @@ export class Donates implements DonatePlatform {
     try {
       return await donates.fetch(donatePlatform);
     } catch (e) {
-      console.log('Error during getting Donates account data:', e);
+      console.error("Error during getting Donates account data:", e);
     }
   }
 
@@ -42,7 +62,7 @@ export class Donates implements DonatePlatform {
       const donatorAcc = await pda.donatorAcc(donatePlatform, id);
       return await donator.fetch(donatorAcc);
     } catch (e) {
-      console.log(`Error during getting Donator(id=${id}) account data:`, e);
+      console.error(`Error during getting Donator(id=${id}) account data:`, e);
     }
   }
 
@@ -69,13 +89,13 @@ export class Donates implements DonatePlatform {
         .accounts({
           donator: address,
           donatorAcc,
-          donatePlatform,
+          donatePlatform
         })
         .rpc();
 
       return true;
     } catch (e) {
-      console.log('Error during sending:', e);
+      console.error("Error during sending:", e);
     }
     return false;
   }
@@ -89,7 +109,7 @@ export class Donates implements DonatePlatform {
         .rpc();
       return true;
     } catch (e) {
-      console.log('Withdraw error:', e);
+      console.error("Withdraw error:", e);
     }
     return false;
   }
@@ -104,12 +124,12 @@ export class Donates implements DonatePlatform {
         .accounts({
           donatePlatform,
           authority,
-          systemProgram,
+          systemProgram
         })
         .rpc();
       return true;
     } catch (err) {
-      console.log('Initialization error:', err);
+      console.error("Initialization error:", err);
     }
     return false;
   }

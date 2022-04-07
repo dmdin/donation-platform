@@ -1,6 +1,8 @@
 <script lang="ts">
+
 </script>
 
-<h1>Platform</h1>
-<h1>Address: 13142412412412412424</h1>
-<h2>1000/10000</h2>
+<div class="flex flex-col items-center">
+  <h1 class="text text-center text-xl font-bold my-3">My Fundraise</h1>
+  <button class="btn btn-accent text-base-100">Create</button>
+</div>

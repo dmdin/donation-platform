@@ -1,19 +1,32 @@
 <script lang="ts">
   import { platform } from '$lib/stores';
 
+  let address;
   async function findFundraiser() {
-    $platform.test();
+    let ok: boolean;
+    ok = await $platform.setOwner(address);
+    if (!ok) return;
+    
+    
+    // let data = await $platform.getData();
+    //
+    // console.log(data.idCounter)
+    // console.log(data.authority)
+    // console.log(data.collected)
+    // console.log(data.target)
   }
 </script>
 
-<div class="m-auto flex flex-col w-80">
+<div class="m-auto flex flex-col w-80 mt-4">
+  <h1 class="text text-center text-xl font-bold my-3">Donate</h1>
   <label class="flex items-center">
     <input
-      class="input input-accent input-bordered w-full"
+      bind:value={address}
+      class="input input-accent input-sm input-bordered w-full"
       placeholder="Fundraiser address"
     />
 
-    <button class="btn btn-ghost btn-circle" on:click={findFundraiser}>
+    <button class="btn btn-sm btn-ghost btn-circle" on:click={findFundraiser}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5"

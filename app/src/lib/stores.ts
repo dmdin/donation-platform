@@ -9,20 +9,10 @@ import { Donates } from '$lib/index';
 workSpace.subscribe(async update => {
   if (!update?.program || !update?.provider || !update?.systemProgram) return;
 
-  const pda = new PDA(update.program.programId);
-  const [donatePlatform] = await pda.donatePlatform(
-    update.provider.wallet.publicKey,
-  );
-
   platform.set(
     new Donates({
-      donates: update.program.account.donates,
-      donator: update.program.account.donator,
       program: update.program,
-      authority: update.provider.wallet.publicKey,
       systemProgram: update.systemProgram.programId,
-      donatePlatform,
-      pda,
     }),
   );
 });
