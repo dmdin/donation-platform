@@ -1,18 +1,30 @@
+import type { Idl, Program, web3 } from '@project-serum/anchor';
 import * as anchor from '@project-serum/anchor';
 import type { PDA } from './pda';
-import type { DonatePlatfrom, DonatesAcc, DonatorAcc, MakeDonation, Success } from './types';
+import type {
+  DonatePlatform,
+  DonatesAcc,
+  DonatorAcc,
+  MakeDonation,
+  Success,
+} from './types';
 
-export class Donates implements DonatePlatfrom {
+export class Donates implements DonatePlatform {
   donates: any;
   donator: any;
   pda: PDA;
-  program: anchor.Program<anchor.Idl>;
-  authority: anchor.web3.PublicKey;
-  systemProgram: anchor.web3.PublicKey;
-  donatePlatform: anchor.web3.PublicKey;
+  program: Program<Idl>;
+  authority: web3.PublicKey;
+  systemProgram: web3.PublicKey;
+  donatePlatform: web3.PublicKey;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(data: DonatePlatfrom) {
+  constructor(data: DonatePlatform) {
+    Object.assign(this, data);
+  }
+
+  test() {
+    const { donates, donatePlatform } = this;
+    console.log(donates, donatePlatform);
   }
 
   async getData(): Promise<DonatesAcc | undefined> {
@@ -41,9 +53,7 @@ export class Donates implements DonatePlatfrom {
       donators.push(this.getDonator(i));
     }
     donators = await Promise.all(donators);
-    donators.sort(
-      (a: DonatorAcc, b: DonatorAcc) => a.amount - b.amount,
-    );
+    donators.sort((a: DonatorAcc, b: DonatorAcc) => a.amount - b.amount);
     return donators;
   }
 

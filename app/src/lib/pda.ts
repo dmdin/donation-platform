@@ -9,10 +9,8 @@ export class PDA {
 
   async donatePlatform(authority: web3.PublicKey) {
     return await web3.PublicKey.findProgramAddress(
-      [
-        Buffer.from('donate_platform'),
-        authority.toBuffer(),
-      ], this.programId,
+      [Buffer.from('donate_platform'), authority.toBuffer()],
+      this.programId,
     );
   }
 
@@ -22,8 +20,8 @@ export class PDA {
         Buffer.from('donate_platform_donator'),
         donatePlatform.toBuffer(),
         Buffer.from(id.toString()),
-      ], this.programId,
+      ],
+      this.programId,
     );
   }
 }
-
