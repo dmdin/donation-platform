@@ -1,67 +1,63 @@
 <script lang="ts">
 	import "../app.css";
 	import {page} from '$app/stores';
-	// import { onMount } from 'svelte';
-	// import { clusterApiUrl } from '@solana/web3.js';
-	// import { WalletProvider } from '@svelte-on-solana/wallet-adapter-ui';
-	// import { AnchorConnectionProvider } from '@svelte-on-solana/wallet-adapter-anchor';
-	// import idl from '../../../target/idl/donation_platform.json';
-	//
-	// const localStorageKey = 'walletAdapter';
-	// const network = clusterApiUrl('devnet');
-	//
-	// let wallets;
-	//
-	// onMount(async () => {
-	//   const {
-	//     PhantomWalletAdapter,
-	//     SlopeWalletAdapter,
-	//     SolflareWalletAdapter,
-	//     SolletExtensionWalletAdapter,
-	//   } = await import('@solana/wallet-adapter-wallets');
-	//
-	//   const walletsMap = [
-	//     new PhantomWalletAdapter(),
-	//     new SlopeWalletAdapter(),
-	//     new SolflareWalletAdapter(),
-	//     new SolletExtensionWalletAdapter(),
-	//   ];
-	//
-	//   wallets = walletsMap;
-	// });
+	import {onMount} from 'svelte';
+	import {clusterApiUrl} from '@solana/web3.js';
+	import {WalletMultiButton, WalletProvider} from '@svelte-on-solana/wallet-adapter-ui';
+	import WalletButton from './_components/WalletButtonWrapper.svelte';
+	
+	import {AnchorConnectionProvider} from '@svelte-on-solana/wallet-adapter-anchor';
+	import idl from '../../../target/idl/donation_platform.json';
+	
+	const localStorageKey = 'walletAdapter';
+	const network = clusterApiUrl('devnet');
+
+	let wallets;
+
+	onMount(async () => {
+	  const {
+	    PhantomWalletAdapter,
+	    SlopeWalletAdapter,
+	    SolflareWalletAdapter,
+	    SolletExtensionWalletAdapter,
+	  } = await import('@solana/wallet-adapter-wallets');
+
+	  const walletsMap = [
+	    new PhantomWalletAdapter(),
+	    new SlopeWalletAdapter(),
+	    new SolflareWalletAdapter(),
+	    new SolletExtensionWalletAdapter(),
+	  ];
+
+	  wallets = walletsMap;
+	});
 	$: path = $page.url.pathname;
 </script>
 
-<!--<WalletProvider {localStorageKey} {wallets} autoConnect />-->
-<!--<AnchorConnectionProvider {network} {idl} />-->
-<div class="m-auto artboard phone-3 grid">
-	<div>
-		
-		<div class="navbar bg-base-100">
+<WalletProvider {localStorageKey} {wallets} autoConnect />
+<AnchorConnectionProvider {network} {idl} />
+<div class="h-screen grid place-items-center bg-base-200">
+	<div class="artboard phone-3 rounded-2xl bg-base-100">
+		<div class="navbar bg-base">
 			<div class="navbar-start">
 				<div class="dropdown">
 					<label tabindex="0" class="btn btn-ghost btn-circle">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+						     stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+						</svg>
 					</label>
 					<ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-						<li><a class:text-accent-focus={path === '/fundrise'} href="/fundrise">Fundraise</a></li>
+						<li><a class:text-accent-focus={path === '/fundraise'} href="/fundraise">Fundraise</a></li>
 						<li><a class:text-accent-focus={path === '/donate'} href="/donate">Donate</a></li>
 					</ul>
 				</div>
 			</div>
-			<div class="navbar-center">
-				<a href="/" class="btn btn-ghost normal-case text-xl">SolDonuts🍩</a>
-			</div>
-			<div class="navbar-end">
-				<button class="btn btn-ghost btn-circle">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-				</button>
-				<button class="btn btn-ghost btn-circle">
-					<div class="indicator">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-						<span class="badge badge-xs badge-primary indicator-item"></span>
-					</div>
-				</button>
+<!--			<div class="navbar-center">-->
+<!--				<a href="/" class="btn btn-ghost normal-case text-xl">SolDonuts🍩</a>-->
+<!--			</div>-->
+			<div class="navbar-end btn-sm text-sm">
+				<WalletButton/>
 			</div>
 		</div>
 		<slot/>

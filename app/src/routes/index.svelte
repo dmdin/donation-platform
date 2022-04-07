@@ -13,7 +13,6 @@
 
 <div class='wrapper-app'>
   <div class='address'>
-<!--    <WalletMultiButton />-->
 	  <button
 		  class="btn btn-primary"
 		  on:click={() =>
