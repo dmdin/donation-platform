@@ -116,9 +116,8 @@ export class Donates implements DonatePlatform {
 
   async initialize(target: number): Promise<Success> {
     if (target <= 0) return false;
-
     try {
-      const { authority, pda, systemProgram, program, donatePlatform } = this;
+      const { authority, systemProgram, program, donatePlatform } = this;
       await program.methods
         .initialize(new anchor.BN(target))
         .accounts({

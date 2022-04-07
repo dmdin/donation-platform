@@ -11,4 +11,7 @@
     @apply btn btn-sm btn-primary text-xs;
     width: 145px;
   }
+  :global(.wallet-adapter-button-start-icon) {
+    @apply mr-0;
+  }
 </style>
