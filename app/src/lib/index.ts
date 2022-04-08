@@ -49,6 +49,8 @@ export class Donates implements DonatePlatform {
 
   async getData(): Promise<DonatesAcc | undefined> {
     const { donates, donatePlatform } = this;
+    if (!donates || !donatePlatform) return
+
     try {
       return await donates.fetch(donatePlatform);
     } catch (e) {
@@ -68,8 +70,11 @@ export class Donates implements DonatePlatform {
 
   async getDonators(): Promise<DonatorAcc[]> {
     const { idCounter } = await this.getData();
+    if (idCounter == 0) return [];
+
     let donators = [];
     for (const i of Array(idCounter).keys()) {
+      console.log(i)
       donators.push(this.getDonator(i));
     }
     donators = await Promise.all(donators);
