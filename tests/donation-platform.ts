@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import {Program} from "@project-serum/anchor";
+import { Program, web3 } from "@project-serum/anchor";
 import {DonationPlatform} from "../target/types/donation_platform";
 import chai, {assert, expect} from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -266,6 +266,44 @@ describe("Let's test donation platform!", () => {
           .signers([donatorKeypair])
           .rpc()
     )()).to.be.rejectedWith(/Error Message: Passed ID is bigger than current ID counter/);
+  });
+
+  it("Send process works for new donator and owner", async () => {
+    let owner = web3.Keypair.generate();
+    let donator = web3.Keypair.generate();
+    await Promise.all([
+      get_lamports(owner.publicKey), get_lamports(donator.publicKey)
+    ])
+
+    let [donatePlatform,] = await find_donate_platform(owner.publicKey);
+    await program.methods
+      .initialize(new anchor.BN(1000))
+      .accounts({
+        donatePlatform,
+        authority: owner.publicKey,
+      })
+      .signers([owner])
+      .rpc();
+
+    let [donatorAcc,] = await find_donator_acc(donatePlatform, 0);
+    let lamportsBefore = await get_balance(donatePlatform);
+    let change = 100;
+
+    await program.methods
+      .send(new anchor.BN(0), new anchor.BN(change))
+      .accounts({
+        donator: donator.publicKey,
+        donatorAcc,
+        donatePlatform,
+      })
+      .signers([donator])
+      .rpc()
+
+    let lamportsAfter = await get_balance(donatePlatform);
+    assert.equal(
+      lamportsAfter, lamportsBefore + change,
+      "Unexpected amount of lamports after send!"
+    )
   });
 
 });

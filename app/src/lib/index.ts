@@ -1,7 +1,15 @@
 import * as anchor from "@project-serum/anchor";
 import { Idl, Program, web3 } from "@project-serum/anchor";
 import { PDA } from "./pda";
-import type { DonatePlatform, DonatesAcc, DonatorAcc, MakeDonation, PlatformInit, Success } from "./types";
+import type {
+  DonatePlatform,
+  DonatesAcc,
+  DonatorAcc,
+  MakeDonation,
+  PlatformDataProps,
+  PlatformInit,
+  Success
+} from "./types";
 
 export class Donates implements DonatePlatform {
 
@@ -47,7 +55,7 @@ export class Donates implements DonatePlatform {
     console.log(donates, donatePlatform);
   }
 
-  async getData(): Promise<DonatesAcc | undefined> {
+  async getPlatform(): Promise<DonatesAcc | undefined> {
     const { donates, donatePlatform } = this;
     if (!donates || !donatePlatform) return
 
@@ -69,7 +77,7 @@ export class Donates implements DonatePlatform {
   }
 
   async getDonators(): Promise<DonatorAcc[]> {
-    const { idCounter } = await this.getData();
+    const { idCounter } = await this.getPlatform();
     if (idCounter == 0) return [];
 
     let donators = [];
@@ -82,9 +90,17 @@ export class Donates implements DonatePlatform {
     return donators;
   }
 
+  async getData(): Promise<PlatformDataProps | undefined> {
+    const platform: DonatesAcc = await this.getPlatform();
+    if (!platform) return;
+    const donators: DonatorAcc[] = await this.getDonators();
+    return {...platform, donators};
+  }
+
   async send(donation: MakeDonation): Promise<Success> {
     const { address, amount, id } = donation;
     if (amount <= 0 || id < 0) return false;
+    console.log(donation)
     const { program, donatePlatform, pda } = this;
     const donatorAcc = await pda.donatorAcc(donatePlatform, id);
 

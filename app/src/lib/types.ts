@@ -37,6 +37,10 @@ export interface DonatorAcc {
   id: number;
 }
 
+export interface PlatformDataProps extends DonatesAcc{
+  donators: DonatorAcc[]
+}
+
 export type MakeDonation = DonatorAcc;
 
 export type Success = boolean;

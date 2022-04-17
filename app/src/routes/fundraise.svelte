@@ -4,16 +4,14 @@
   import type { DonatesAcc } from "$lib/types";
   import ShortAddress from "./_components/ShortAddress.svelte";
   import { DonatorAcc } from "$lib/types";
+  import Platform from "./_components/Platform.svelte";
   
   let step = 0;
   let prevStep = 0;
   let target = 0;
   let ok: boolean;
-  let copied = false;
   
-  let platformData: DonatesAcc;
-  let donatersData: DonatorAcc[] = [];
-  
+  let data;
   $: if ($wallet) {
     loadPlatformData();
   }
@@ -21,14 +19,11 @@
   async function loadPlatformData() {
     ok = await $platform.setOwner($wallet.publicKey);
     if (!ok) return; // TODO Show error label
-    platformData = (await $platform.getData());
-    donatersData = (await $platform.getDonators());
-    if (platformData) step = 2;
-    
+    data = await $platform.getData();
+    if (data) step = 2;
   }
   
   async function setPlatformOwner() {
-    
     prevStep = step;
     step++;
   }
@@ -46,8 +41,8 @@
 </script>
 
 <div class="flex flex-col items-center h-4/6">
-  <h1 class="text text-center text-xl font-bold mt-40">My Fundraise</h1>
-  <div class="flex flex-col items-center justify-between h-80 mt-2">
+  <h1 class="text text-center text-xl font-bold mt-40 mb-2">My Fundraise</h1>
+  <div class="flex flex-col items-center justify-between h-80">
     {#if step === 0}
       <div
         class="flex flex-col items-center"
@@ -74,6 +69,7 @@
         <h2>Enter the target of fundraise in Lamports</h2>
         <input
           class="input input-accent w-40 mt-3" type="number" min="0"
+          pattern="[0-9]*" inputmode="numeric"
           bind:value={target}
         >
         <button
@@ -93,29 +89,12 @@
       </button>
     {/if}
     
-    {:else if step === 2 && platformData}
-      <div class="flex flex-col items-center">
-        <ShortAddress address={platformData.authority} />
-        <h2 class="text-xs font-bold mt-5">Collected Lamports</h2>
-        <h2 class="text-xs mt-1">{platformData.collected} / {platformData.target}</h2>
-        <progress
-          class="progress w-56 progress-accent mt-2"
-          value={platformData.collected}
-          max={platformData.target}>
-        </progress>
-        <div class="overflow-y-auto">
-          {#each donatersData as don}
-            <h3>{don}</h3>
-            <h3>{don.id}</h3>
-            <h3>{don.address}</h3>
-            <h3>{don.amount}</h3>
-            
-          {/each}
-        </div>
+    {:else if step === 2 && data}
+      <div>
+        <Platform {...data} title="To buy tasty 🍩">
+          <button class="btn btn-outline">Withdraw</button>
+        </Platform>
       </div>
     {/if}
-    
-
-  
   </div>
 </div>

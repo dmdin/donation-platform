@@ -1,55 +1,83 @@
 <script lang="ts">
-  import { platform } from '$lib/stores';
-  import Fa from 'svelte-fa';
-  import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+  import { othersAddress, platform, wallet } from "$lib/stores";
+  import Fa from "svelte-fa";
+  import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+  import Platform from "./_components/Platform.svelte";
+  import { fly } from "svelte/transition";
   
-  let ok: boolean
-  let address;
+  let ok: boolean;
+  let amount: number;
+  let step = 1;
+  let address = $othersAddress;
+  let dataPromise = address ? findFundraiser() : Promise.resolve(undefined);
   
+  // 29mQ1f4CvW8zJT4cDRcsZv3FsNRX16FNFfubFXDHCND3
   async function findFundraiser() {
+    if (!address) return;
     ok = await $platform.setOwner(address);
     if (!ok) return;
+    othersAddress.set(address);
+    dataPromise = $platform.getData();
+  }
+  
+  async function donate(id: number){
+    if (typeof amount !== "number") return;
     
-    
-    // let data = await $platform.getData();
-    //
-    // console.log(data.idCounter)
-    // console.log(data.authority)
-    // console.log(data.collected)
-    // console.log(data.target)
+    console.log($wallet.publicKey.toString())
+    let ok = await $platform.send({
+      address: $wallet.publicKey,
+      amount,
+      id: 0,
+    })
+    if (!ok) return;
+  //  TODO make an error bar
   }
 </script>
 
 <div class="m-auto flex flex-col w-80 mt-4">
-  <h1 class="text text-center text-xl font-bold my-3">Donate</h1>
+  <h1 class="text text-center text-xl font-bold my-3">Find Fundraise</h1>
   <label class="flex items-center">
     <input
       bind:value={address}
       class="input input-accent input-sm input-bordered w-full"
       placeholder="Fundraiser address"
     />
-
+    
     <button class="btn btn-sm btn-ghost btn-circle" on:click={findFundraiser}>
-      <Fa icon={faMagnifyingGlass} size="lg"/>
-<!--      <svg-->
-<!--        xmlns="http://www.w3.org/2000/svg"-->
-<!--        class="h-5 w-5"-->
-<!--        fill="none"-->
-<!--        viewBox="0 0 24 24"-->
-<!--        stroke="currentColor"-->
-<!--      >-->
-<!--        <path-->
-<!--          stroke-linecap="round"-->
-<!--          stroke-linejoin="round"-->
-<!--          stroke-width="2"-->
-<!--          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"-->
-<!--        />-->
-<!--      </svg>-->
+      <Fa icon={faMagnifyingGlass} size="lg" />
     </button>
   </label>
-  <!--		<label class="flex items-center justify-between">-->
-  <!--			<input class="input input-accent" type="number" min="0">-->
-  <!--			<span>Lamports</span>-->
-  <!--		</label>-->
-  <!--		<button class="mt-4 btn btn-primary">Send</button>-->
+  <div class="mt-20">
+    {#await dataPromise}
+      Loading...
+    {:then data}
+      {#if data}
+        <Platform {...data} title="Other's Fundraise">
+          {#if step === 0}
+            <button
+              class="btn btn-primary btn-outline btn-sm"
+              on:click={() => step++}
+            >
+              Donate
+            </button>
+          {:else}
+            <div class="flex flex-col items-center" in:fly={{x: 10}}>
+              <h3 class="my-1 text-xs">Enter donation amount</h3>
+              <input
+                class="input input-accent input-sm w-32" type="number" min="1"
+                pattern="[0-9]*" inputmode="numeric"
+                placeholder="100"
+                bind:value={amount}>
+              <button
+                class="btn btn-primary btn-outline btn-sm mt-2"
+                on:click={donate}
+              >
+                Donate
+              </button>
+            </div>
+          {/if}
+        </Platform>
+      {/if}
+    {/await}
+  </div>
 </div>
