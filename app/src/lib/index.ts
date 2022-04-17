@@ -100,7 +100,6 @@ export class Donates implements DonatePlatform {
   async send(donation: MakeDonation): Promise<Success> {
     const { address, amount, id } = donation;
     if (amount <= 0 || id < 0) return false;
-    console.log(donation)
     const { program, donatePlatform, pda } = this;
     const donatorAcc = await pda.donatorAcc(donatePlatform, id);
 

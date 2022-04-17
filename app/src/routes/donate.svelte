@@ -24,7 +24,7 @@
     if (typeof amount !== "number") return;
     
     console.log($wallet.publicKey.toString())
-    let ok = await $platform.send({
+    ok = await $platform.send({
       address: $wallet.publicKey,
       amount,
       id: 0,
@@ -70,6 +70,7 @@
                 bind:value={amount}>
               <button
                 class="btn btn-primary btn-outline btn-sm mt-2"
+                disabled={!amount}
                 on:click={donate}
               >
                 Donate
