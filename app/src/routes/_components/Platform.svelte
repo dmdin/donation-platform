@@ -5,15 +5,22 @@
   
   export let title;
   export let authority: web3.PublicKey;
-  export let collected: number;
-  export let target: number;
-  export let idCounter: number;
+  export let collected: number | any;
+  export let target: number | any;
+  export let idCounter: number | any;
   export let donators: DonatorAcc[];
-  
-  if (target <= collected) {
-    title = "✅ " + title;
+
+  if (target && target instanceof Object) {
+    target = Number(target);
+  }
+
+  if (collected && collected instanceof Object) {
+    collected = Number(collected);
   }
   
+  if ( collected >= target ) {
+    title = "✅ " + title;
+  }
   const emojiForPlace = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "9️⃣", "🔟"];
   
 </script>
@@ -36,8 +43,8 @@
   <div class="w-full overflow-y-auto">
     {#each donators as {address, amount}, i}
       <div class="flex justify-between text-xs">
-        <div>
-          {emojiForPlace[i]}
+        <div class="my-1">
+          <span>{emojiForPlace[i]}</span>
           <ShortAddress {address}/>
         </div>
         <h3>{amount} Lamps</h3>

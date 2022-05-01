@@ -3,7 +3,7 @@
   import type { web3 } from "@project-serum/anchor";
   
   export let address: web3.PublicKey;
-  let className;
+  let className = '';
   export { className as class};
   let tip = "Click to copy";
   

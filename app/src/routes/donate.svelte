@@ -31,6 +31,7 @@
     })
     if (!ok) return;
   //  TODO make an error bar
+    dataPromise = $platform.getData();
   }
 </script>
 
