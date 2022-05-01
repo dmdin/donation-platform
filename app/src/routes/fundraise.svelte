@@ -37,6 +37,7 @@
     // TODO Show error label
     ok = await $platform.initialize(target);
     if (!ok) return;
+    await loadPlatformData()
   }
 
 </script>
