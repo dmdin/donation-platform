@@ -1,0 +1,246 @@
+{
+  "version": "0.1.0",
+  "name": "donation_platform",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "donatePlatform",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "topDonators",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "target",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "send",
+      "accounts": [
+        {
+          "name": "donator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "donatorAcc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "donatePlatform",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "topDonators",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "donatePlatform",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Donates",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "target",
+            "type": "u64"
+          },
+          {
+            "name": "collected",
+            "type": "u64"
+          },
+          {
+            "name": "idCounter",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Donator",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TopDonators",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "donators",
+            "type": {
+              "vec": {
+                "defined": "DonatorStruct"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "DonatorStruct",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "DonationEvent",
+      "fields": [
+        {
+          "name": "at",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "platformAfter",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "from",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "WithdrawEvent",
+      "fields": [
+        {
+          "name": "at",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ZeroLamports",
+      "msg": "Amount of lamports must be more than zero"
+    },
+    {
+      "code": 6001,
+      "name": "NoCollectedLamports",
+      "msg": "Impossible to withdraw. No lamports were collected"
+    },
+    {
+      "code": 6002,
+      "name": "TargetReached",
+      "msg": "The target was reached"
+    },
+    {
+      "code": 6003,
+      "name": "NoLamportsForRent",
+      "msg": "Impossible to withdraw. Not enough lamports to pay rent"
+    },
+    {
+      "code": 6004,
+      "name": "IDBiggerThanCounter",
+      "msg": "Passed ID is bigger than current ID counter"
+    }
+  ],
+  "metadata": {
+    "address": "73nLsFDxG2nqXaQMMcBpbgPZgtJdSAGF7XhEYbE9Kcdo"
+  }
+}

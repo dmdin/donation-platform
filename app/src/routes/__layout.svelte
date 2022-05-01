@@ -9,7 +9,7 @@
   import { faBars, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
   
   import { AnchorConnectionProvider } from "@svelte-on-solana/wallet-adapter-anchor";
-  import idl from "../../../target/idl/donation_platform.json";
+  import idl from "$lib/donation_platform.json";
   
   const localStorageKey = "walletAdapter";
   const network = clusterApiUrl("devnet");

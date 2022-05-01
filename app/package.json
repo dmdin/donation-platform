@@ -22,6 +22,7 @@
     "@svelte-on-solana/wallet-adapter-core": "^1.0.2-alpha.0",
     "@svelte-on-solana/wallet-adapter-ui": "^1.0.11-alpha.0",
     "@sveltejs/adapter-static": "^1.0.0-next.26",
+    "@sveltejs/adapter-vercel": "^1.0.0-next.50",
     "@sveltejs/kit": "^1.0.0-next.288",
     "@tailwindcss/typography": "^0.5.2",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
