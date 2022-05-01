@@ -7,9 +7,11 @@
   import WalletButton from "./_components/WalletButtonWrapper.svelte";
   import Fa from "svelte-fa";
   import { faBars, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
-  
   import { AnchorConnectionProvider } from "@svelte-on-solana/wallet-adapter-anchor";
   import idl from "$lib/donation_platform.json";
+  
+  import { Buffer } from 'buffer';
+  global.Buffer = Buffer;
   
   const localStorageKey = "walletAdapter";
   const network = clusterApiUrl("devnet");
