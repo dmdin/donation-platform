@@ -54,6 +54,12 @@
           >
             <li>
               <a
+                class:text-accent-focus={path === '/'}
+                href="/">Home</a
+              >
+            </li>
+            <li>
+              <a
                 class:text-accent-focus={path === '/fundraise'}
                 href="/fundraise">Fundraise</a
               >
