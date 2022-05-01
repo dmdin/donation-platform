@@ -49,7 +49,7 @@
   </label>
   <div class="mt-20">
     {#await dataPromise}
-      Loading...
+      <h2 class="text-center">Loading...</h2>
     {:then data}
       {#if data}
         <Platform {...data} title="Other's Fundraise">

@@ -113,7 +113,7 @@ export class Donates implements DonatePlatform {
     const { address, amount, id } = donation;
     if (amount <= 0 || id < 0) return false;
     const { program, donatePlatform, topDonators, pda } = this;
-    const donatorAcc = await pda.donatorAcc(donatePlatform, id);
+    const [donatorAcc, ] = await pda.donatorAcc(donatePlatform, id);
 
     try {
       await program.methods
@@ -122,10 +122,9 @@ export class Donates implements DonatePlatform {
           donator: address,
           donatorAcc,
           donatePlatform,
-          topDonators
+          topDonators,
         })
         .rpc();
-
       return true;
     } catch (e) {
       console.error("Error during sending:", e);
