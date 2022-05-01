@@ -21,15 +21,18 @@ export class Donates implements DonatePlatform {
   pda: PDA;
   donates: any;
   donator: any;
+  top: any;
 
   // This fields we set when we know owner of platform
   authority: web3.PublicKey;
   donatePlatform: web3.PublicKey;
+  topDonators: web3.PublicKey;
 
   constructor({ program, systemProgram }: PlatformInit) {
     this.program = program;
     this.donates = program.account.donates;
     this.donator = program.account.donator;
+    this.top = program.account.topDonators;
     this.systemProgram = systemProgram;
     this.pda = new PDA(program.programId);
   }
@@ -45,7 +48,10 @@ export class Donates implements DonatePlatform {
     }
     this.authority = authority;
     const [donatePlatform] = await this.pda.donatePlatform(authority);
+    const [topDonators] = await this.pda.topDonators(authority);
+
     this.donatePlatform = donatePlatform;
+    this.topDonators = topDonators;
     return true;
   }
 
@@ -76,7 +82,7 @@ export class Donates implements DonatePlatform {
     }
   }
 
-  async getDonators(): Promise<DonatorAcc[]> {
+  async getDonatorsOld(): Promise<DonatorAcc[]> {
     const { idCounter } = await this.getPlatform();
     if (idCounter == 0) return [];
 
@@ -88,6 +94,12 @@ export class Donates implements DonatePlatform {
     donators = await Promise.all(donators);
     donators.sort((a: DonatorAcc, b: DonatorAcc) => a.amount - b.amount);
     return donators;
+  }
+
+  async getDonators(): Promise<DonatorAcc[]> {
+    const top = (await this.top.fetch(this.topDonators)).donators;
+    top.sort((a, b) => b.amount - a.amount);
+    return top;
   }
 
   async getData(): Promise<PlatformDataProps | undefined> {

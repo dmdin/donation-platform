@@ -34,13 +34,14 @@ export interface DonatesAcc {
 export interface DonatorAcc {
   address: web3.PublicKey;
   amount: number;
-  id: number;
 }
 
 export interface PlatformDataProps extends DonatesAcc{
   donators: DonatorAcc[]
 }
 
-export type MakeDonation = DonatorAcc;
+export interface MakeDonation extends DonatorAcc {
+  id: number;
+}
 
 export type Success = boolean;
