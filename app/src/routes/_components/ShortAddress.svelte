@@ -3,7 +3,8 @@
   import type { web3 } from "@project-serum/anchor";
   
   export let address: web3.PublicKey;
-  
+  let className;
+  export { className as class};
   let tip = "Click to copy";
   
   function updateClipboard(newClip) {
@@ -16,7 +17,7 @@
 </script>
 
 <div
-  class="tooltip"
+  class="tooltip {className}"
   data-tip={tip}
 >
   <button

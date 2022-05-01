@@ -1,9 +1,6 @@
 <script lang="ts">
   import { platform, wallet } from "$lib/stores";
   import { fly } from "svelte/transition";
-  import type { DonatesAcc } from "$lib/types";
-  import ShortAddress from "./_components/ShortAddress.svelte";
-  import { DonatorAcc } from "$lib/types";
   import Platform from "./_components/Platform.svelte";
   
   let step = 0;
@@ -21,6 +18,10 @@
     if (!ok) return; // TODO Show error label
     data = await $platform.getData();
     if (data) step = 2;
+  }
+  
+  async function withdraw() {
+    await $platform.withdraw();
   }
   
   async function setPlatformOwner() {
@@ -42,7 +43,7 @@
 
 <div class="flex flex-col items-center h-4/6">
   <h1 class="text text-center text-xl font-bold mt-40 mb-2">My Fundraise</h1>
-  <div class="flex flex-col items-center justify-between h-80">
+  <div class="flex flex-col items-center justify-between h-80 w-80">
     {#if step === 0}
       <div
         class="flex flex-col items-center"
@@ -79,22 +80,25 @@
           Create
         </button>
       </div>
-    {#if 0 < step && step < 2}
-      <button
-        class="btn btn-ghost"
-        on:click={() => {prevStep = step; step--}}
-        in:fly={{y: 10}}
-      >
-        Back
-      </button>
-    {/if}
+      {#if 0 < step && step < 2}
+        <button
+          class="btn btn-ghost"
+          on:click={() => {prevStep = step; step--}}
+          in:fly={{y: 10}}
+        >
+          Back
+        </button>
+      {/if}
     
     {:else if step === 2 && data}
-      <div>
-        <Platform {...data} title="To buy tasty 🍩">
-          <button class="btn btn-outline">Withdraw</button>
-        </Platform>
-      </div>
+      <Platform {...data} title="To buy tasty 🍩">
+        <button
+          class="btn btn-primary btn-outline btn-sm"
+          on:click={withdraw}
+        >
+          Withdraw
+        </button>
+      </Platform>
     {/if}
   </div>
 </div>
