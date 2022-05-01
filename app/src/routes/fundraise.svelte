@@ -8,7 +8,7 @@
   
   let step = 0;
   let prevStep = 0;
-  let target = 0;
+  let target;
   let ok: boolean;
   
   let data;
@@ -69,7 +69,7 @@
         <h2>Enter the target of fundraise in Lamports</h2>
         <input
           class="input input-accent w-40 mt-3" type="number" min="0"
-          pattern="[0-9]*" inputmode="numeric"
+          pattern="[0-9]*" inputmode="numeric" placeholder="10000"
           bind:value={target}
         >
         <button

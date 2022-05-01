@@ -112,7 +112,7 @@ export class Donates implements DonatePlatform {
   async send(donation: MakeDonation): Promise<Success> {
     const { address, amount, id } = donation;
     if (amount <= 0 || id < 0) return false;
-    const { program, donatePlatform, pda } = this;
+    const { program, donatePlatform, topDonators, pda } = this;
     const donatorAcc = await pda.donatorAcc(donatePlatform, id);
 
     try {
@@ -121,7 +121,8 @@ export class Donates implements DonatePlatform {
         .accounts({
           donator: address,
           donatorAcc,
-          donatePlatform
+          donatePlatform,
+          topDonators
         })
         .rpc();
 
@@ -149,13 +150,14 @@ export class Donates implements DonatePlatform {
   async initialize(target: number): Promise<Success> {
     if (target <= 0) return false;
     try {
-      const { authority, systemProgram, program, donatePlatform } = this;
+      const { authority, systemProgram, program, donatePlatform, topDonators } = this;
       await program.methods
         .initialize(new anchor.BN(target))
         .accounts({
           donatePlatform,
           authority,
-          systemProgram
+          systemProgram,
+          topDonators
         })
         .rpc();
       return true;
