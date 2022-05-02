@@ -43,7 +43,7 @@
 <WalletProvider {localStorageKey} {wallets} autoConnect />
 <AnchorConnectionProvider {network} {idl} />
 <div data-theme={theme} class="h-screen grid place-items-center bg-base-200">
-  <div class="artboard phone-3 rounded-2xl bg-base-100">
+  <div class="screen artboard phone-3 rounded-2xl bg-base-100">
     <div class="navbar bg-base">
       <div class="navbar-start">
         <div class="dropdown">
@@ -97,3 +97,12 @@
     <slot />
   </div>
 </div>
+
+<style>
+  .screen {
+    width: 100%;
+    height: 100%;
+    max-width: 375px;
+    max-height: 667px;
+  }
+</style>

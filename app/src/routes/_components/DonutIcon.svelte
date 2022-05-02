@@ -35,7 +35,6 @@
     animation: spin-animation infinite 20s linear;
     display: inline-block;
     pointer-events: none;
-    margin-bottom: 20px;
   }
   
   @keyframes spin-animation {
