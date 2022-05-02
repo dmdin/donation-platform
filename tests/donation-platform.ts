@@ -348,7 +348,7 @@ describe("Let's test donation platform!", () => {
     );
     assert.equal(
       top[1].amount, 77,
-      "Top 2 donator amount must be 100"
+      "Top 2 donator amount must be 77"
     );
   });
 });
