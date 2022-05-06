@@ -37,3 +37,8 @@ To deploy just run
 ```shell
   $: vercel
 ```
+
+## 🖼 Preview
+![изображение](https://user-images.githubusercontent.com/25639843/167093149-362586e8-6438-417d-9056-6975adda83a6.png)
+![изображение](https://user-images.githubusercontent.com/25639843/167093207-88f7a0c1-0c40-4d2b-b3ce-5cfba23becc9.png)
+
